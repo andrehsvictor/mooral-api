@@ -36,125 +36,112 @@ public class ServletExceptionHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        List<ValidationErrorDto> validationErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(this::mapFieldError)
-                .collect(Collectors.toList());
-
-        ErrorDto errorDto = ErrorDto.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .timestamp(Instant.now().toString())
-                .code(ErrorCode.VALIDATION_FAILED.name())
-                .message("Validation failed")
-                .path(extractPath(request))
-                .traceId(extractTraceId())
-                .errors(validationErrors)
-                .build();
-
-        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        List<ValidationErrorDto> validationErrors = buildValidationErrors(ex);
+        return createErrorResponseWithValidationErrors(
+                HttpStatus.BAD_REQUEST,
+                ErrorCode.VALIDATION_FAILED,
+                "Validation failed",
+                request,
+                validationErrors);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        ErrorDto errorDto = ErrorDto.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .timestamp(Instant.now().toString())
-                .code(ErrorCode.MALFORMED_REQUEST.name())
-                .message("Malformed JSON request")
-                .path(extractPath(request))
-                .traceId(extractTraceId())
-                .build();
-
-        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        return createObjectErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ErrorCode.MALFORMED_REQUEST,
+                "Malformed JSON request",
+                request);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        String supportedMethods = String.join(", ", ex.getSupportedMethods());
-        String message = String.format("Request method '%s' not supported. Supported methods are: %s",
-                ex.getMethod(), supportedMethods);
-
-        ErrorDto errorDto = ErrorDto.builder()
-                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
-                .timestamp(Instant.now().toString())
-                .code(ErrorCode.METHOD_NOT_ALLOWED.name())
-                .message(message)
-                .path(extractPath(request))
-                .traceId(extractTraceId())
-                .build();
-
-        return new ResponseEntity<>(errorDto, HttpStatus.METHOD_NOT_ALLOWED);
+        String message = buildMethodNotSupportedMessage(ex);
+        return createObjectErrorResponse(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                ErrorCode.METHOD_NOT_ALLOWED,
+                message,
+                request);
     }
 
     @Override
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        String supportedTypes = ex.getSupportedMediaTypes().stream()
-                .map(Object::toString)
-                .collect(Collectors.joining(", "));
-        String message = String.format("Content type '%s' not supported. Supported types are: %s",
-                ex.getContentType(), supportedTypes);
-
-        ErrorDto errorDto = ErrorDto.builder()
-                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE.value())
-                .timestamp(Instant.now().toString())
-                .code(ErrorCode.UNSUPPORTED_MEDIA_TYPE.name())
-                .message(message)
-                .path(extractPath(request))
-                .traceId(extractTraceId())
-                .build();
-
-        return new ResponseEntity<>(errorDto, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        String message = buildMediaTypeNotSupportedMessage(ex);
+        return createObjectErrorResponse(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                ErrorCode.UNSUPPORTED_MEDIA_TYPE,
+                message,
+                request);
     }
 
     @Override
     protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        String message = String.format("Required request parameter '%s' for method parameter type %s is not present",
-                ex.getParameterName(), ex.getParameterType());
-
-        ErrorDto errorDto = ErrorDto.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .timestamp(Instant.now().toString())
-                .code(ErrorCode.VALIDATION_FAILED.name())
-                .message(message)
-                .path(extractPath(request))
-                .traceId(extractTraceId())
-                .build();
-
-        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
+        String message = buildMissingParameterMessage(ex);
+        return createObjectErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                ErrorCode.VALIDATION_FAILED,
+                message,
+                request);
     }
 
     @Override
     protected ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        String message = String.format("No handler found for %s %s", ex.getHttpMethod(), ex.getRequestURL());
-
-        ErrorDto errorDto = ErrorDto.builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .timestamp(Instant.now().toString())
-                .code(ErrorCode.RESOURCE_NOT_FOUND.name())
-                .message(message)
-                .path(extractPath(request))
-                .traceId(extractTraceId())
-                .build();
-
-        return new ResponseEntity<>(errorDto, HttpStatus.NOT_FOUND);
+        String message = buildNoHandlerFoundMessage(ex);
+        return createObjectErrorResponse(
+                HttpStatus.NOT_FOUND,
+                ErrorCode.RESOURCE_NOT_FOUND,
+                message,
+                request);
     }
 
-    // Handler para MethodArgumentTypeMismatchException (não é tratada automaticamente pelo ResponseEntityExceptionHandler)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorDto> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException ex,
             WebRequest request) {
-        String message = String.format("The parameter '%s' of value '%s' could not be converted to type '%s'",
-                ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName());
-
+        String message = buildArgumentTypeMismatchMessage(ex);
         return createErrorResponse(
                 HttpStatus.BAD_REQUEST,
                 ErrorCode.VALIDATION_FAILED,
                 message,
                 request);
+    }
+
+    private List<ValidationErrorDto> buildValidationErrors(MethodArgumentNotValidException ex) {
+        return ex.getBindingResult().getFieldErrors().stream()
+                .map(this::mapFieldError)
+                .collect(Collectors.toList());
+    }
+
+    private String buildMethodNotSupportedMessage(HttpRequestMethodNotSupportedException ex) {
+        String supportedMethods = String.join(", ", ex.getSupportedMethods());
+        return String.format("Request method '%s' not supported. Supported methods are: %s",
+                ex.getMethod(), supportedMethods);
+    }
+
+    private String buildMediaTypeNotSupportedMessage(HttpMediaTypeNotSupportedException ex) {
+        String supportedTypes = ex.getSupportedMediaTypes().stream()
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
+        return String.format("Content type '%s' not supported. Supported types are: %s",
+                ex.getContentType(), supportedTypes);
+    }
+
+    private String buildMissingParameterMessage(MissingServletRequestParameterException ex) {
+        return String.format("Required request parameter '%s' for method parameter type %s is not present",
+                ex.getParameterName(), ex.getParameterType());
+    }
+
+    private String buildNoHandlerFoundMessage(NoHandlerFoundException ex) {
+        return String.format("No handler found for %s %s", ex.getHttpMethod(), ex.getRequestURL());
+    }
+
+    private String buildArgumentTypeMismatchMessage(MethodArgumentTypeMismatchException ex) {
+        return String.format("The parameter '%s' of value '%s' could not be converted to type '%s'",
+                ex.getName(), ex.getValue(), ex.getRequiredType().getSimpleName());
     }
 
     private ValidationErrorDto mapFieldError(FieldError fieldError) {
@@ -165,17 +152,35 @@ public class ServletExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
     }
 
+    private ResponseEntity<Object> createErrorResponseWithValidationErrors(HttpStatus status, ErrorCode errorCode,
+            String message, WebRequest request, List<ValidationErrorDto> validationErrors) {
+        ErrorDto errorDto = buildErrorDto(status, errorCode, message, request, validationErrors);
+        return new ResponseEntity<>(errorDto, status);
+    }
+
     private ResponseEntity<ErrorDto> createErrorResponse(HttpStatus status, ErrorCode errorCode, String message,
             WebRequest request) {
-        ErrorDto errorDto = ErrorDto.builder()
+        ErrorDto errorDto = buildErrorDto(status, errorCode, message, request, null);
+        return new ResponseEntity<>(errorDto, status);
+    }
+
+    private ResponseEntity<Object> createObjectErrorResponse(HttpStatus status, ErrorCode errorCode, String message,
+            WebRequest request) {
+        ErrorDto errorDto = buildErrorDto(status, errorCode, message, request, null);
+        return new ResponseEntity<>(errorDto, status);
+    }
+
+    private ErrorDto buildErrorDto(HttpStatus status, ErrorCode errorCode, String message, WebRequest request,
+            List<ValidationErrorDto> validationErrors) {
+        return ErrorDto.builder()
                 .status(status.value())
                 .timestamp(Instant.now().toString())
                 .code(errorCode.name())
                 .message(message)
                 .path(extractPath(request))
                 .traceId(extractTraceId())
+                .errors(validationErrors)
                 .build();
-        return new ResponseEntity<>(errorDto, status);
     }
 
     private String extractPath(WebRequest request) {
