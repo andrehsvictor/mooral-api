@@ -11,3 +11,8 @@ spring:
     hibernate:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+server:
+  compression:
+    enabled: true
+    min-response-size: 1024
