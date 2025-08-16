@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: @project.name@
+    version: @project.version@
+  threads:
+    virtual:
+      enabled: true
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
