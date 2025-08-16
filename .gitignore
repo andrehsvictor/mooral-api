@@ -36,6 +36,7 @@ build/
 .env
 application-dev.yml
 *.pem
+*.key
 .keys/
 keys/
 logs/
