@@ -112,8 +112,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return createErrorResponse(HttpStatus.UNAUTHORIZED, "Authentication failed");
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ErrorDto> handleDisabledException(DisabledException ex) {
