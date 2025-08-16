@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Mooral API ###
+.env
+application-dev.yml
+*.pem
+.keys/
+keys/
+logs/
+*.log
