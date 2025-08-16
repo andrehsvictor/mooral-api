@@ -1,4 +1,4 @@
-package io.github.andrehsvictor.mooral.api.user.entity;
+package io.github.andrehsvictor.mooral.api.user;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -8,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,40 +23,26 @@ import lombok.ToString;
 @Setter
 @Entity
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = { "id" })
-@ToString(exclude = { "password", "oauthId" })
-public class User implements Serializable {
+public class Authority implements Serializable {
 
-    private static final long serialVersionUID = 5512414650896493794L;
+    private static final long serialVersionUID = 7165386420309603779L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    private String name;
-    private String username;
-    private String email;
-
-    @Builder.Default
-    private Boolean emailVerified = false;
-
-    private String bio;
-    private String avatarUrl;
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    private OAuthProvider oauthProvider;
     
-    private String oauthId;
+    private String name;
+    private String displayName;
+    private String description;
 
     @CreationTimestamp
     private Instant createdAt;
 
     @UpdateTimestamp
     private Instant updatedAt;
-
-    private Instant suspendedUntil;
 
 }
