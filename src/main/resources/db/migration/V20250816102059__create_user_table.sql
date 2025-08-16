@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS user (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    email_verified BOOLEAN DEFAULT FALSE,
+    bio TEXT,
+    avatar_url VARCHAR(255),
+    password VARCHAR(255),
+    oauth_provider VARCHAR(255),
+    oauth_id VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    suspended_until TIMESTAMP WITH TIME ZONE
+);
