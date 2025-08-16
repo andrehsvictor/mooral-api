@@ -8,6 +8,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -59,9 +60,23 @@ public class SecurityExceptionHandler {
                 request);
     }
 
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorDto> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+        return createErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                ErrorCode.INVALID_CREDENTIALS,
+                "Authentication failed",
+                request);
+    }
+
     private ResponseEntity<ErrorDto> createErrorResponse(HttpStatus status, ErrorCode errorCode, String message,
             WebRequest request) {
-        ErrorDto errorDto = ErrorDto.builder()
+        ErrorDto errorDto = buildErrorDto(status, errorCode, message, request);
+        return new ResponseEntity<>(errorDto, status);
+    }
+
+    private ErrorDto buildErrorDto(HttpStatus status, ErrorCode errorCode, String message, WebRequest request) {
+        return ErrorDto.builder()
                 .status(status.value())
                 .timestamp(Instant.now().toString())
                 .code(errorCode.name())
@@ -69,7 +84,6 @@ public class SecurityExceptionHandler {
                 .path(extractPath(request))
                 .traceId(extractTraceId())
                 .build();
-        return new ResponseEntity<>(errorDto, status);
     }
 
     private String extractPath(WebRequest request) {
