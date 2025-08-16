@@ -2,6 +2,8 @@ package io.github.andrehsvictor.mooral.api.user;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +15,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -50,7 +55,7 @@ public class User implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private OAuthProvider oauthProvider;
-    
+
     private String oauthId;
 
     @CreationTimestamp
@@ -60,5 +65,10 @@ public class User implements Serializable {
     private Instant updatedAt;
 
     private Instant suspendedUntil;
+
+    @ManyToMany
+    @Builder.Default
+    @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "authority_id"))
+    private Set<Authority> authorities = new HashSet<>();
 
 }
