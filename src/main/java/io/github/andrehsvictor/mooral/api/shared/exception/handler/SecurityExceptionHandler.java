@@ -11,7 +11,6 @@ import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import io.github.andrehsvictor.mooral.api.shared.dto.exception.ErrorDto;
 import io.github.andrehsvictor.mooral.api.shared.exception.ErrorCode;
@@ -20,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
-public class SecurityExceptionHandler extends ResponseEntityExceptionHandler {
+public class SecurityExceptionHandler {
 
     private final Tracer tracer;
 
