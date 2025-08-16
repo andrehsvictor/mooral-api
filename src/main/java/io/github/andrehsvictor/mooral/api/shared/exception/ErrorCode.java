@@ -1,0 +1,13 @@
+package io.github.andrehsvictor.mooral.api.shared.exception;
+
+public enum ErrorCode {
+    VALIDATION_FAILED,
+    RESOURCE_NOT_FOUND,
+    INVALID_CREDENTIALS,
+    ACCOUNT_SUSPENDED,
+    EMAIL_NOT_VERIFIED,
+    NO_PERMISSION,
+    UNAUTHORIZED_ACCESS,
+    RESOURCE_ALREADY_EXISTS,
+    FORBIDDEN_OPERATION;
+}
