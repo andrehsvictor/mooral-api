@@ -45,9 +45,9 @@ public class TokenService {
     public TokenPairDto refresh(RefreshTokenDto refreshTokenDto, HttpServletRequest request) {
         Jwt refreshToken = jwtService.decode(refreshTokenDto.getRefreshToken());
         Session session = sessionService.getById(UUID.fromString(refreshToken.getClaimAsString("sid")));
-        revokedTokenService.revoke(refreshToken);
         Jwt accessToken = jwtService.issueAccessToken(refreshToken, session);
         Jwt newRefreshToken = jwtService.issueRefreshToken(refreshToken);
+        revokedTokenService.revoke(refreshToken);
         Long expiresIn = accessToken.getExpiresAt().getEpochSecond() - accessToken.getIssuedAt().getEpochSecond();
         String scope = accessToken.getClaimAsString("scope");
         return TokenPairDto.builder()
