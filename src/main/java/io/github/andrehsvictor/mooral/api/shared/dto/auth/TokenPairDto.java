@@ -22,7 +22,7 @@ public class TokenPairDto {
     private String tokenType = "Bearer";
 
     @JsonProperty("expires_in")
-    private Integer expiresIn;
+    private Long expiresIn;
 
     private String scope;
 
