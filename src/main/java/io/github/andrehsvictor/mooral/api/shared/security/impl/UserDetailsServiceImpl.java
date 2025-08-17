@@ -1,5 +1,6 @@
 package io.github.andrehsvictor.mooral.api.shared.security.impl;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -8,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserDetailsService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    @Override
     public UserDetailsImpl loadUserByUsername(String username) {
         return userRepository.findByUsernameOrEmail(username)
                 .map(UserDetailsImpl::new)
