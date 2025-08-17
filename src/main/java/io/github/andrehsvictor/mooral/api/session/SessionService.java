@@ -46,7 +46,7 @@ public class SessionService {
         return sessionRepository.findById(id).orElseThrow(() -> new UnauthorizedException());
     }
 
-    public void invalidate(UUID id) {
+    public void deleteById(UUID id) {
         sessionRepository.deleteById(id);
     }
 

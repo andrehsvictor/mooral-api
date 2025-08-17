@@ -62,7 +62,7 @@ public class TokenService {
         Jwt token = jwtService.decode(revokeTokenDto.getToken());
         revokedTokenService.revoke(token);
         if (token.getClaimAsString("typ").equals("Refresh")) {
-            sessionService.invalidate(UUID.fromString(token.getClaimAsString("sid")));
+            sessionService.deleteById(UUID.fromString(token.getClaimAsString("sid")));
         }
     }
 }
