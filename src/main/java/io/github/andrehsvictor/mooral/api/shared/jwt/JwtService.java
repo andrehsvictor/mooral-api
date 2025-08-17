@@ -72,9 +72,9 @@ public class JwtService {
         try {
             return jwtDecoder.decode(token);
         } catch (JwtException e) {
-            throw new UnauthorizedException("Failed to decode JWT", e);
+            throw new UnauthorizedException("Invalid JWT token: " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unexpected error while decoding JWT token", e);
         }
     }
 
@@ -86,9 +86,12 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(accessTokenLifespan);
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .audience(audience)
                 .subject(authentication.getName())
                 .issuedAt(now)
                 .expiresAt(expiresAt)
+                .notBefore(now)
                 .claim(authorityClaimName, scope)
                 .claim("sid", sessionId)
                 .id(UUID.randomUUID().toString())
@@ -100,6 +103,8 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(refreshTokenLifespan);
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .audience(audience)
                 .subject(authentication.getName())
                 .issuedAt(now)
                 .expiresAt(expiresAt)
@@ -113,13 +118,17 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(actionTokenLifespan);
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .audience(audience)
                 .subject(subject)
                 .issuedAt(now)
                 .expiresAt(expiresAt)
                 .claim("action", action)
                 .id(UUID.randomUUID().toString())
                 .claim("typ", "Action");
-        additionalClaims.forEach(claimsBuilder::claim);
+        if (additionalClaims != null) {
+            additionalClaims.forEach(claimsBuilder::claim);
+        }
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsBuilder.build()));
     }
 
@@ -127,6 +136,8 @@ public class JwtService {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(lifespan);
         JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
+                .issuer(issuer)
+                .audience(audience)
                 .subject(subject)
                 .issuedAt(now)
                 .expiresAt(expiresAt)
@@ -135,4 +146,5 @@ public class JwtService {
                 .claim("typ", "PAT");
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsBuilder.build()));
     }
+
 }
