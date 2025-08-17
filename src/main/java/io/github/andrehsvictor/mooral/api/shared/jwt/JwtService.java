@@ -20,6 +20,8 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import io.github.andrehsvictor.mooral.api.session.Session;
+import io.github.andrehsvictor.mooral.api.shared.exception.BadRequestException;
 import io.github.andrehsvictor.mooral.api.shared.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 
@@ -99,6 +101,24 @@ public class JwtService {
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsBuilder.build()));
     }
 
+    public Jwt issueAccessToken(Jwt refreshToken, Session session) {
+        if (!"Refresh".equals(refreshToken.getClaimAsString("typ"))) {
+            throw new BadRequestException("The provided token is not a refresh token");
+        }
+        JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
+                .issuer(refreshToken.getIssuer().toString())
+                .audience(refreshToken.getAudience())
+                .subject(refreshToken.getSubject())
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(accessTokenLifespan))
+                .notBefore(Instant.now())
+                .claim(authorityClaimName, session.getScope())
+                .claim("sid", refreshToken.getClaimAsString("sid"))
+                .id(UUID.randomUUID().toString())
+                .claim("typ", "Bearer");
+        return jwtEncoder.encode(JwtEncoderParameters.from(claimsBuilder.build()));
+    }
+
     public Jwt issueRefreshToken(Authentication authentication, String sessionId) {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(refreshTokenLifespan);
@@ -109,6 +129,22 @@ public class JwtService {
                 .issuedAt(now)
                 .expiresAt(expiresAt)
                 .claim("sid", sessionId)
+                .id(UUID.randomUUID().toString())
+                .claim("typ", "Refresh");
+        return jwtEncoder.encode(JwtEncoderParameters.from(claimsBuilder.build()));
+    }
+
+    public Jwt issueRefreshToken(Jwt refreshToken) {
+        if (!refreshToken.getClaimAsString("typ").equals("Refresh")) {
+            throw new BadRequestException("The provided token is not a refresh token");
+        }
+        JwtClaimsSet.Builder claimsBuilder = JwtClaimsSet.builder()
+                .issuer(refreshToken.getIssuer().toString())
+                .audience(refreshToken.getAudience())
+                .subject(refreshToken.getSubject())
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plus(refreshTokenLifespan))
+                .claim("sid", refreshToken.getClaimAsString("sid"))
                 .id(UUID.randomUUID().toString())
                 .claim("typ", "Refresh");
         return jwtEncoder.encode(JwtEncoderParameters.from(claimsBuilder.build()));
