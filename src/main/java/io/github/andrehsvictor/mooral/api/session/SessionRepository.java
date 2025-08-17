@@ -6,4 +6,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface SessionRepository extends CrudRepository<Session, UUID> {
 
+    boolean existsById(UUID id);
+
 }

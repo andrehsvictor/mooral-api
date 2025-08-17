@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import io.github.andrehsvictor.mooral.api.shared.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -35,6 +36,18 @@ public class SessionService {
                 .build();
 
         return sessionRepository.save(session);
+    }
+
+    public boolean existsById(UUID id) {
+        return sessionRepository.existsById(id);
+    }
+
+    public Session getById(UUID id) {
+        return sessionRepository.findById(id).orElseThrow(() -> new UnauthorizedException());
+    }
+
+    public void invalidate(UUID id) {
+        sessionRepository.deleteById(id);
     }
 
 }
