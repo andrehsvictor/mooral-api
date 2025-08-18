@@ -33,7 +33,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = { "id" })
-@ToString(exclude = { "password", "oauthId" })
+@ToString(exclude = { "password", "oauthId", "authorities" })
 public class User implements Serializable {
 
     private static final long serialVersionUID = 5512414650896493794L;
