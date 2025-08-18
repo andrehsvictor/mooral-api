@@ -7,6 +7,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final CorsProperties corsProperties;
@@ -40,7 +42,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
-            "/v3/api-docs",
+            "/v3/api-docs"
     };
 
     private static final String[] ACTUATOR_ALLOWED_PATHS = {
@@ -55,16 +57,14 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    SecurityFilterChain actuatorSecurityFilterChain(
-            HttpSecurity http) throws Exception {
+    SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/actuator/**");
         http.csrf(AbstractHttpConfigurer::disable);
         http.cors(Customizer.withDefaults());
-        http.sessionManagement(session -> session.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS));
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(authorize -> {
             authorize.requestMatchers(ACTUATOR_ALLOWED_PATHS).permitAll();
-            authorize.requestMatchers(ACTUATOR_RESTRICTED_PATHS).hasRole("ADMIN");
+            authorize.requestMatchers(ACTUATOR_RESTRICTED_PATHS).hasAnyRole("ROOT", "ADMIN");
             authorize.anyRequest().denyAll();
         });
         http.httpBasic(Customizer.withDefaults());
@@ -76,23 +76,20 @@ public class SecurityConfig {
     SecurityFilterChain standardSecurityFilterChain(
             HttpSecurity http,
             JwtDecoder jwtDecoder,
-            AccessTokenFilter accessTokenFilter) throws Exception {
+            BearerTokenFilter bearerTokenFilter) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.cors(Customizer.withDefaults());
         http.securityMatcher("/**");
-        http.sessionManagement(session -> session.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS));
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authorizeHttpRequests(authorize -> {
-            authorize.requestMatchers(HttpMethod.POST, ALLOWED_PATHS_WITH_POST_METHOD)
-                    .permitAll();
-            authorize.requestMatchers(HttpMethod.PUT, ALLOWED_PATHS_WITH_PUT_METHOD)
-                    .permitAll();
-            authorize.requestMatchers(ALLOWED_PATHS_WITH_ANY_METHOD)
-                    .permitAll();
+            authorize.requestMatchers(HttpMethod.POST, ALLOWED_PATHS_WITH_POST_METHOD).permitAll();
+            // authorize.requestMatchers(HttpMethod.PUT,
+            // ALLOWED_PATHS_WITH_PUT_METHOD).permitAll();
+            authorize.requestMatchers(ALLOWED_PATHS_WITH_ANY_METHOD).permitAll();
             authorize.anyRequest().authenticated();
         });
         http.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder)));
-        http.addFilterBefore(accessTokenFilter, AuthorizationFilter.class);
+        http.addFilterBefore(bearerTokenFilter, AuthorizationFilter.class);
         return http.build();
     }
 
