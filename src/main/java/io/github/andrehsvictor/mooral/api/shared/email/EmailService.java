@@ -57,12 +57,17 @@ public class EmailService {
         String urlWithToken = message.getUrl().contains("?")
                 ? message.getUrl() + "&token=" + message.getToken()
                 : message.getUrl() + "?token=" + message.getToken();
+
+        String oldEmail = (String) message.getExtra().get("oldEmail");
+
         Map<String, Object> variables = Map.of(
                 "name", message.getName(),
                 "url", urlWithToken,
-                "expiration", getExpirationText());
-        String body = processTemplate("email/change-email", variables);
-        sendEmail(message.getEmail(), "Change your email", body);
+                "expiration", getExpirationText(),
+                "oldEmail", oldEmail,
+                "newEmail", message.getEmail());
+        String body = processTemplate("email/email-change", variables);
+        sendEmail(message.getEmail(), "Confirm email change", body);
     }
 
     @Async
