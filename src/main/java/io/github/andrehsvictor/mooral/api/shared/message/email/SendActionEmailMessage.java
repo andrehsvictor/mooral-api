@@ -1,5 +1,7 @@
 package io.github.andrehsvictor.mooral.api.shared.message.email;
 
+import java.util.Map;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,5 +13,6 @@ public class SendActionEmailMessage {
     private String email;
     private String url;
     private String token;
-    
+    private Map<String, Object> extra;
+
 }
