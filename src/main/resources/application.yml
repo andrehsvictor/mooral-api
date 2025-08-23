@@ -2,18 +2,36 @@ spring:
   application:
     name: @project.name@
     version: @project.version@
+    
   profiles:
     active: dev
+
   threads:
     virtual:
       enabled: true
+
   flyway:
     locations: classpath:db/migration
+
   jpa:
+    show-sql: true
     hibernate:
       ddl-auto: none
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+
+  cache:
+    type: redis
+
+  rabbitmq:
+    listener:
+      direct:
+        retry:
+          enabled: true
+          max-attempts: 3
+
+  mail:
+    protocol: smtp
 
 server:
   compression:
