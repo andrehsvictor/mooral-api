@@ -1,0 +1,1 @@
+ALTER TABLE mural RENAME TO board;
