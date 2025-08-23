@@ -1,4 +1,4 @@
-package io.github.andrehsvictor.mooral.api.mural;
+package io.github.andrehsvictor.mooral.api.board;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -30,7 +30,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @EqualsAndHashCode(of = { "id" })
 @ToString(exclude = { "user" })
-public class Mural implements Serializable {
+public class Board implements Serializable {
 
     private static final long serialVersionUID = 8151231335928688767L;
 
