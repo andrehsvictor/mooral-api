@@ -13,7 +13,7 @@
 	<artifactId>mooral-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Mooral API</name>
-	<description>Digital Boards Platform API</description>
+	<description>Digital Boards API</description>
 	<url />
 	<licenses>
 		<license />
