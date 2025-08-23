@@ -1,0 +1,3 @@
+ALTER TABLE mural
+ADD hidden_at TIMESTAMP WITH TIME ZONE,
+ADD hiding_reason VARCHAR(255);
