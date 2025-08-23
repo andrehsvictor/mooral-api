@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import io.github.andrehsvictor.mooral.api.session.Session;
 import io.github.andrehsvictor.mooral.api.session.SessionService;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.CredentialsDto;
+import io.github.andrehsvictor.mooral.api.shared.dto.auth.IntrospectTokenDto;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.RefreshTokenDto;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.RevokeTokenDto;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.TokenPairDto;
@@ -65,5 +66,10 @@ public class TokenService {
             return;
         }
         revokedTokenService.revoke(token);
+    }
+
+    public Jwt introspect(IntrospectTokenDto introspectTokenDto) {
+        Jwt token = jwtService.decode(introspectTokenDto.getToken());
+        return token;
     }
 }
