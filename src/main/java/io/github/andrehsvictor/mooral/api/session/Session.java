@@ -1,6 +1,7 @@
 package io.github.andrehsvictor.mooral.api.session;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -33,7 +34,7 @@ public class Session implements Serializable {
 
     private String ip;
     private String userAgent;
-    private String scope;
+    private List<String> authorities;
 
     @Builder.Default
     private Long lastActivity = System.currentTimeMillis();
@@ -43,5 +44,13 @@ public class Session implements Serializable {
 
     @TimeToLive(unit = TimeUnit.MILLISECONDS)
     private Long expiresAt;
+
+    public String getScope() {
+        return String.join(" ", authorities);
+    }
+
+    public void updateLastActivity() {
+        this.lastActivity = System.currentTimeMillis();
+    }
 
 }

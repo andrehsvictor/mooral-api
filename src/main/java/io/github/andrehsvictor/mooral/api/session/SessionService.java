@@ -1,6 +1,7 @@
 package io.github.andrehsvictor.mooral.api.session;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,15 +24,15 @@ public class SessionService {
     private Duration sessionTimeout = Duration.ofHours(24);
 
     public Session create(Authentication authentication, HttpServletRequest request) {
-        String scope = authentication.getAuthorities()
+        List<String> authorities = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(" "));
+                .collect(Collectors.toList());
         Session session = Session.builder()
                 .userId(UUID.fromString(authentication.getName()))
                 .ip(request.getRemoteAddr())
                 .userAgent(request.getHeader("User-Agent"))
-                .scope(scope)
+                .authorities(authorities)
                 .expiresAt(System.currentTimeMillis() + sessionTimeout.toMillis())
                 .build();
 
