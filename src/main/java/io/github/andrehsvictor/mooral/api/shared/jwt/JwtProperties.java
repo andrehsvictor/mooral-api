@@ -38,4 +38,21 @@ public class JwtProperties {
         private Duration emailChange = Duration.ofHours(1);
     }
 
+    public Duration getAccessTokenLifespan() {
+        return lifespan.getAccessToken();
+    }
+
+    public Duration getRefreshTokenLifespan() {
+        return lifespan.getRefreshToken();
+    }
+
+    public Duration getActionTokenLifespan(String action) {
+        return switch (action) {
+            case "verify-email" -> lifespan.getActionToken().getEmailVerification();
+            case "reset-password" -> lifespan.getActionToken().getPasswordReset();
+            case "change-email" -> lifespan.getActionToken().getEmailChange();
+            default -> throw new IllegalArgumentException("Unknown action: " + action);
+        };
+    }
+
 }
