@@ -37,18 +37,3 @@ server:
   compression:
     enabled: true
     min-response-size: 1024
-
-io:
-  github:
-    andrehsvictor:
-      mooral-api:
-        jwt:
-          issuer: http://localhost:8080/realms/mooral/protocol/openid-connect
-          audience: http://localhost:8080/realms/mooral/protocol/openid-connect
-          lifespan:
-            - access-token: 15m
-            - refresh-token: 7d
-            - action-token: 
-              - email-verification: 24h
-              - password-reset: 1h
-              - email-change: 24h
