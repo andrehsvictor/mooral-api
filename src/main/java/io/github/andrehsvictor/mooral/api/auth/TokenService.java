@@ -12,6 +12,7 @@ import io.github.andrehsvictor.mooral.api.shared.dto.auth.CredentialsDto;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.RefreshTokenDto;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.RevokeTokenDto;
 import io.github.andrehsvictor.mooral.api.shared.dto.auth.TokenPairDto;
+import io.github.andrehsvictor.mooral.api.shared.jwt.JwtIssuanceService;
 import io.github.andrehsvictor.mooral.api.shared.jwt.JwtService;
 import io.github.andrehsvictor.mooral.api.shared.revokedtoken.RevokedTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class TokenService {
 
     private final JwtService jwtService;
+    private final JwtIssuanceService jwtIssuanceService;
     private final SessionService sessionService;
     private final RevokedTokenService revokedTokenService;
     private final AuthenticationService authenticationService;
@@ -30,8 +32,8 @@ public class TokenService {
         Authentication authentication = authenticationService.authenticate(
                 credentialsDto.getUsername(), credentialsDto.getPassword());
         Session session = sessionService.create(authentication, request);
-        Jwt accessToken = jwtService.issueAccessToken(authentication, session.getId().toString());
-        Jwt refreshToken = jwtService.issueRefreshToken(authentication, session.getId().toString());
+        Jwt accessToken = jwtIssuanceService.issueAccessToken(session);
+        Jwt refreshToken = jwtIssuanceService.issueRefreshToken(session);
         Long expiresIn = accessToken.getExpiresAt().getEpochSecond() - accessToken.getIssuedAt().getEpochSecond();
         String scope = accessToken.getClaimAsString("scope");
         return TokenPairDto.builder()
@@ -45,8 +47,8 @@ public class TokenService {
     public TokenPairDto refresh(RefreshTokenDto refreshTokenDto, HttpServletRequest request) {
         Jwt refreshToken = jwtService.decode(refreshTokenDto.getRefreshToken());
         Session session = sessionService.getById(UUID.fromString(refreshToken.getClaimAsString("sid")));
-        Jwt accessToken = jwtService.issueAccessToken(refreshToken, session);
-        Jwt newRefreshToken = jwtService.issueRefreshToken(refreshToken);
+        Jwt accessToken = jwtIssuanceService.issueAccessToken(session);
+        Jwt newRefreshToken = jwtIssuanceService.issueRefreshToken(session);
         revokedTokenService.revoke(refreshToken);
         Long expiresIn = accessToken.getExpiresAt().getEpochSecond() - accessToken.getIssuedAt().getEpochSecond();
         String scope = accessToken.getClaimAsString("scope");
