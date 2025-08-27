@@ -1,7 +1,11 @@
 package io.github.andrehsvictor.mooral.api.shared.dto.account;
 
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
+import lombok.Data;
 
+@Data
+@Builder
 public class UpdateAccountDto {
 
     @Size(max = 100, message = "Username must be at most 100 characters")

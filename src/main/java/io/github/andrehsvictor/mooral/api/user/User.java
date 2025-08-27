@@ -53,6 +53,18 @@ public class User implements Serializable {
     private String avatarUrl;
     private String password;
 
+    @Builder.Default
+    private Integer boardsCount = 0;
+
+    @Builder.Default
+    private Integer boardsViewsCount = 0;
+
+    @Builder.Default
+    private Integer boardsLikesCount = 0;
+
+    @Builder.Default
+    private Integer boardsCommentsCount = 0;
+
     @Enumerated(EnumType.STRING)
     private OAuthProvider oauthProvider;
 
