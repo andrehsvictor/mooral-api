@@ -23,6 +23,11 @@ public class AccountService {
     private final AuthorityService authorityService;
     private final PasswordEncoder passwordEncoder;
 
+    public AccountDto getCurrent() {
+        User user = userService.getById(jwtService.getCurrentUserUuid());
+        return accountMapper.userToAccountDto(user);
+    }
+
     public AccountDto create(CreateAccountDto createAccountDto) {
         User user = accountMapper.createAccountDtoToUser(createAccountDto);
         user.setPassword(passwordEncoder.encode(createAccountDto.getPassword()));
