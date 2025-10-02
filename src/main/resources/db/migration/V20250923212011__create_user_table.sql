@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS user (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    email_verified BOOLEAN DEFAULT FALSE,
+    email_verification_token VARCHAR(255),
+    email_verification_token_expires_at TIMESTAMP WITH TIME ZONE,
+    email_change_token VARCHAR(255),
+    email_change_token_expires_at TIMESTAMP WITH TIME ZONE,
+    email_change_new_email VARCHAR(255),
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    avatar_url VARCHAR(255),
+    bio TEXT,
+    password_hash TEXT,
+    password_reset_token VARCHAR(255),
+    password_reset_token_expires_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
